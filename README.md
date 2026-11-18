@@ -9,6 +9,7 @@
 | 第 0 周 | [环境准备：测试钱包、lREACT、Foundry](notes/day-00-environment.md) | Lasna 余额已验证；模板 `forge test` 8/8 通过 |
 | D1 · 11/16 | [用例拆解卡：测试钱包大额转账监控](notes/d1-use-case.md) | 方案已写，合约地址待部署后补充 |
 | D2 · 11/17 | [用 `cast` 读取 Lasna 费用参数](notes/day-02-lasna-fees.md) | 三个链上参数已实测 |
+| D3 · 11/18 | [第一次 Reactive 部署](notes/d3-first-reactive.md) | 合约与测试已准备，等待链上部署 |
 
 ## 当前项目设想
 
