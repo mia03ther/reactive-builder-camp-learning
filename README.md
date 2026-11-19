@@ -10,10 +10,11 @@
 | D1 · 11/16 | [用例拆解卡：测试钱包大额转账监控](notes/d1-use-case.md) | 方案已写，合约地址待部署后补充 |
 | D2 · 11/17 | [用 `cast` 读取 Lasna 费用参数](notes/day-02-lasna-fees.md) | 三个链上参数已实测 |
 | D3 · 11/18 | [第一次 Reactive 部署](notes/d3-first-reactive.md) | Lasna 合约与 `react()` 交易已验证 |
+| D4 · 11/19 | [跨链回调三步走](notes/d4-cross-chain-callback.md) | Sepolia 事件 → Lasna `react()` → Sepolia Callback 已验证；直接调用失败实验已记录 |
 
 ## 当前项目设想
 
-监听 Sepolia 上测试 ERC-20 的 `Transfer` 事件；当测试钱包单笔转出达到阈值时，Lasna 上的 Reactive 合约判断并请求回调，让 Sepolia 的记录合约发出告警事件。[详细流程与简图](notes/d1-use-case.md)在 D1 卡片中。这是待实现的设计，尚无已部署合约或跨链回调交易。
+监听 Sepolia 上测试 ERC-20 的 `Transfer` 事件；当测试钱包单笔转出达到阈值时，Lasna 上的 Reactive 合约判断并请求回调，让 Sepolia 的记录合约发出告警事件。[详细流程与简图](notes/d1-use-case.md)在 D1 卡片中。该钱包监控用例仍待实现；D4 已用模板的 `Ping` 事件独立跑通三段测试网链路。
 
 ## 参考资料
 
