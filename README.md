@@ -12,6 +12,7 @@
 | D3 · 11/18 | [第一次 Reactive 部署](notes/d3-first-reactive.md) | Lasna 合约与 `react()` 交易已验证 |
 | D4 · 11/19 | [跨链回调三步走](notes/d4-cross-chain-callback.md) | Sepolia 事件 → Lasna `react()` → Sepolia Callback 已验证；直接调用失败实验已记录 |
 | 第 2 周方向 | [项目方向卡：Wallet Transfer Watch](notes/d5-project-direction.md) | 赛道 2，solo；最小 Demo 待实现 |
+| 场景小实验 | [动态订阅与停止事件](notes/d6-dynamic-subscription.md) | 两次 `react()` 已验证，第二次自动退订 |
 
 ## 当前项目设想
 
