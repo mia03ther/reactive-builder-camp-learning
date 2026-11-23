@@ -69,6 +69,14 @@ contract DynamicPingMonitorTest is Test {
         assertEq(monitor.seen(), 0);
     }
 
+    function testWrongTopicCountIgnored() public {
+        IReactive.LogRecord memory wrong = _ping(1, 44);
+        wrong.opCode = 3;
+        vm.prank(SYSTEM);
+        monitor.react(wrong);
+        assertEq(monitor.seen(), 0);
+    }
+
     function _ping(uint256 value, uint256 txHash) internal view returns (IReactive.LogRecord memory) {
         return IReactive.LogRecord({
             chainId: 11155111,
@@ -79,7 +87,7 @@ contract DynamicPingMonitorTest is Test {
             topic3: 0,
             data: abi.encode(value),
             blockNumber: 1,
-            opCode: 3,
+            opCode: 2,
             blockHash: 10,
             txHash: txHash,
             logIndex: 0

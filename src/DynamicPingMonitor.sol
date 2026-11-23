@@ -32,7 +32,7 @@ contract DynamicPingMonitor is AbstractReactive {
     function react(LogRecord calldata log_) external onlySystem {
         if (!active || log_.chainId != SEPOLIA_CHAIN_ID ||
             log_.contractAddress != ORIGIN || log_.topic0 != PING_TOPIC_0 ||
-            log_.opCode != 3 || log_.data.length != 32) return;
+            log_.opCode != 2 || log_.data.length != 32) return;
 
         uint256 value = abi.decode(log_.data, (uint256));
         seen += 1;
