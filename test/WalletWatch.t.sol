@@ -11,11 +11,15 @@ import {AlertRecorder} from "../src/AlertRecorder.sol";
 
 contract WatchSystemMock {
     uint256 public unsubscriptions;
+    uint256 public requestCount;
     ISystemContract.CallbackConfiguration_V_1_0 public request;
 
     function subscribe(uint256, address, uint256, uint256, uint256, uint256) external {}
     function unsubscribe(uint256, address, uint256, uint256, uint256, uint256) external { unsubscriptions++; }
-    function requestCallbackV_1_0(ISystemContract.CallbackConfiguration_V_1_0 memory config) external { request = config; }
+    function requestCallbackV_1_0(ISystemContract.CallbackConfiguration_V_1_0 memory config) external {
+        request = config;
+        requestCount++;
+    }
     function lastRequest() external view returns (ISystemContract.CallbackConfiguration_V_1_0 memory) { return request; }
 }
 
@@ -42,7 +46,7 @@ contract WalletWatchTest is Test {
         system = WatchSystemMock(SYSTEM);
         proxy = new WatchProxyMock();
         token = new WatchToken();
-        monitor = new WalletWatchReactive{value: 0.1 ether}(address(token), WATCHED, 100 ether);
+        monitor = new WalletWatchReactive{value: 0.1 ether}(address(token), WATCHED, 100 ether, 1_000 ether);
         recorder = new AlertRecorder{value: 0.02 ether}(IPayable(payable(address(proxy))), address(monitor));
         monitor.setRecipient(address(recorder));
     }
@@ -57,6 +61,12 @@ contract WalletWatchTest is Test {
         vm.stopPrank();
         assertEq(monitor.remaining(), 0);
         assertEq(system.unsubscriptions(), 1);
+        assertTrue(monitor.processed(keccak256(abi.encode(uint256(11155111), uint256(2), uint256(7)))));
+
+        vm.prank(SYSTEM);
+        monitor.react(high);
+        assertEq(system.unsubscriptions(), 1);
+        assertEq(system.requestCount(), 1);
 
         ISystemContract.CallbackConfiguration_V_1_0 memory config = system.lastRequest();
         assertEq(config.recipient, address(recorder));
@@ -65,6 +75,15 @@ contract WalletWatchTest is Test {
         assertTrue(recorder.recorded(keccak256(abi.encode(uint256(2), uint256(7)))));
         assertTrue(proxy.deliver(address(recorder), address(monitor), config.payload));
         assertEq(recorder.count(), 1);
+    }
+
+    function testAmountCapBlocksOversizedTransfer() public {
+        IReactive.LogRecord memory oversized = _log(1_001 ether, 3);
+        vm.prank(SYSTEM);
+        monitor.react(oversized);
+        assertEq(monitor.remaining(), 1);
+        assertEq(system.unsubscriptions(), 0);
+        assertEq(system.requestCount(), 0);
     }
 
     function testUnauthorizedCallsAndWrongWallet() public {

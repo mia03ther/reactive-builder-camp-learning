@@ -16,18 +16,21 @@ contract WalletWatchReactive is AbstractReactive {
     address public immutable token;
     address public immutable watched;
     uint256 public immutable threshold;
+    uint256 public immutable maxAmount;
     address public recipient;
     uint256 public remaining = 1;
+    mapping(bytes32 => bool) public processed;
 
     event AlertRequested(uint256 indexed sourceTxHash, uint256 indexed logIndex, address to, uint256 amount);
 
-    constructor(address token_, address watched_, uint256 threshold_) payable {
+    constructor(address token_, address watched_, uint256 threshold_, uint256 maxAmount_) payable {
         require(token_ != address(0) && watched_ != address(0), "zero address");
-        require(threshold_ > 0 && msg.value > 0, "invalid configuration");
+        require(threshold_ > 0 && maxAmount_ >= threshold_ && msg.value > 0, "invalid configuration");
         owner = msg.sender;
         token = token_;
         watched = watched_;
         threshold = threshold_;
+        maxAmount = maxAmount_;
         SYSTEM.subscribe(SEPOLIA, token_, TRANSFER_TOPIC, uint256(uint160(watched_)), REACTIVE_IGNORE, REACTIVE_IGNORE);
     }
 
@@ -46,9 +49,12 @@ contract WalletWatchReactive is AbstractReactive {
             log_.data.length != 32) return;
 
         uint256 amount = abi.decode(log_.data, (uint256));
-        if (amount < threshold) return;
+        if (amount < threshold || amount > maxAmount) return;
         address to = address(uint160(log_.topic2));
+        bytes32 eventId = keccak256(abi.encode(log_.chainId, log_.txHash, log_.logIndex));
+        if (processed[eventId]) return;
 
+        processed[eventId] = true;
         remaining = 0;
         emit AlertRequested(log_.txHash, log_.logIndex, to, amount);
         SYSTEM.unsubscribe(SEPOLIA, token, TRANSFER_TOPIC, uint256(uint160(watched)), REACTIVE_IGNORE, REACTIVE_IGNORE);

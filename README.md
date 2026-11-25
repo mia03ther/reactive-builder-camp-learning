@@ -51,6 +51,12 @@ sequenceDiagram
 
 此最小 Demo 只使用测试网和测试代币。Reactive 合约的处理上限是 1 次，达到后退订；Callback 端按源交易哈希和日志序号去重。回调成功后 `AlertRecorder.count() = 1`，Reactive 与 Callback Proxy 的 `debt` 均为 0。
 
+### 保护与出问题怎么办
+
+当前源码还检查链、代币、`from` 钱包、`Transfer` topic 和金额阈值；用链 ID、源交易哈希和日志序号识别已处理事件。自动告警只处理 **100–1,000 WWTT**，上限等于这个测试代币的总发行量，异常的大于总量的日志不会触发回调；单次实验最多请求 **1 次**回调，并限制回调 gas 为 500,000。告警合约不持有或转移被监控代币，所以自动资产转移上限是 **0 WWTT**。[保护测试](test/WalletWatch.t.sol)覆盖正常告警、低于阈值、错误钱包、超额金额、重复事件与未授权回调。以上金额上限和 Reactive 侧显式去重属于本次源码更新，**先前已部署的 MVP 合约仍是旧版，不能原地升级**；若要在链上验证新增保护，需重新部署。
+
+Lasna 合约余额不足时，费用可能形成 `debt`；只要欠款大于 0，系统就停止调用 `react()`。通过 Lasna 系统合约 `0x8888888888888888888888888888888888888888` 的 `depositTo(address)` 给该 Reactive 合约充值，可先清欠再恢复未来事件；只把 lREACT 转到合约地址不会自动清欠。目标链 `AlertRecorder` 也要有 Sepolia ETH；若 Callback Proxy 记录了欠款，通过 Sepolia Proxy 的 `depositTo(address)` 清欠。失败的 `react()` 或回调仍收费，失败回调不会自动重试；检查 Reactscan 和 Sepolia 回执中的失败原因，修好后需要重新触发或部署新实例。本 Demo 成功处理一次后会退订，**充值不会重新订阅**；需要继续监控时应部署新实例。
+
 ## 参考资料
 
 - [Reactive Contracts](https://dev.reactive.network/reactive-contracts)
