@@ -13,4 +13,4 @@ remappings = [
 
 [rpc_endpoints]
 lasna = "https://lasna-rpc.rnk.dev/"
-sepolia = "https://ethereum-sepolia-rpc.publicnode.com"
+sepolia = "https://11155111.rpc.thirdweb.com"
